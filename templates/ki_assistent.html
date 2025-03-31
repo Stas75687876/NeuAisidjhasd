@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KI-Assistent</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --primary-color: #9C27B0;
+            --secondary-color: #BA68C8;
+            --accent-color: #7B1FA2;
+            --text-color: #2C3E50;
+            --light-color: #F6F0F9;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            background: linear-gradient(135deg, #9C27B0 0%, #BA68C8 100%);
+            min-height: 100vh;
+            font-family: 'Comic Neue', cursive;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 30px auto;
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .container::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 8px;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+        }
+
+        h1 {
+            color: var(--accent-color);
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.8rem;
+            font-weight: bold;
+            position: relative;
+        }
+
+        h1::after {
+            content: "🤖";
+            position: absolute;
+            margin-left: 15px;
+            font-size: 0.8em;
+        }
+
+        .back-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: white;
+            border: 3px solid var(--primary-color);
+            padding: 10px 20px;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            z-index: 100;
+            text-decoration: none;
+            color: var(--accent-color);
+            font-weight: bold;
+        }
+
+        .back-button:hover {
+            background: var(--primary-color);
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+        .chat-container {
+            height: 500px;
+            overflow-y: auto;
+            padding: 20px;
+            background-color: var(--light-color);
+            border-radius: 15px;
+            margin-bottom: 20px;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.05);
+        }
+
+        .message {
+            margin-bottom: 20px;
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .message-user {
+            justify-content: flex-end;
+        }
+
+        .message-content {
+            padding: 12px 20px;
+            border-radius: 20px;
+            max-width: 70%;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+
+        .message-ai .message-content {
+            background-color: white;
+            border-top-left-radius: 5px;
+            color: var(--text-color);
+        }
+
+        .message-user .message-content {
+            background-color: var(--primary-color);
+            color: white;
+            border-top-right-radius: 5px;
+        }
+
+        .message-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 10px;
+            font-size: 1.5rem;
+        }
+
+        .ai-avatar {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .user-avatar {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        .input-container {
+            display: flex;
+            margin-top: 20px;
+        }
+
+        .message-input {
+            flex-grow: 1;
+            padding: 15px;
+            border: 2px solid var(--primary-color);
+            border-radius: 25px;
+            font-size: 1.1rem;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .message-input:focus {
+            box-shadow: 0 0 0 3px rgba(156, 39, 176, 0.2);
+        }
+
+        .send-button {
+            margin-left: 10px;
+            padding: 10px 25px;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            border: none;
+            border-radius: 25px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .send-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .send-button:active {
+            transform: translateY(1px);
+        }
+
+        .typing-indicator {
+            display: none;
+            padding: 10px;
+            background-color: rgba(255, 255, 255, 0.7);
+            border-radius: 20px;
+            margin-top: 10px;
+            text-align: center;
+            font-style: italic;
+            color: var(--accent-color);
+        }
+
+        .typing-indicator.active {
+            display: block;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.5; }
+            50% { opacity: 1; }
+            100% { opacity: 0.5; }
+        }
+
+        .features-panel {
+            margin-top: 30px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .features-title {
+            color: var(--accent-color);
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+            text-align: center;
+        }
+
+        .features-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .feature-chip {
+            padding: 8px 15px;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background-color: white;
+            border: 2px solid var(--primary-color);
+            color: var(--accent-color);
+        }
+
+        .feature-chip:hover {
+            background-color: var(--primary-color);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+
+        .floating-emojis {
+            position: fixed;
+            pointer-events: none;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+
+        .floating-emoji {
+            position: absolute;
+            font-size: 2rem;
+            animation: float 15s linear infinite;
+            opacity: 0.3;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) translateX(0);
+            }
+            100% {
+                transform: translateY(-100px) translateX(calc(100vw * var(--direction)));
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+                margin: 15px auto;
+            }
+            
+            h1 {
+                font-size: 2.2rem;
+            }
+
+            .chat-container {
+                height: 400px;
+            }
+
+            .message-content {
+                max-width: 85%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="/" class="back-button">← Zurück zum Menü</a>
+    
+    <div class="floating-emojis" id="floatingEmojis"></div>
+    
+    <div class="container animate__animated animate__fadeIn">
+        <h1 class="animate__animated animate__bounceIn">KI-Assistent</h1>
+        
+        <div class="chat-container" id="chatContainer">
+            <div class="message message-ai">
+                <div class="message-avatar ai-avatar">🤖</div>
+                <div class="message-content">
+                    Hallo! Ich bin dein KI-Assistent. Wie kann ich dir heute helfen? Ich kann Fragen beantworten, bei Hausaufgaben helfen, Geschichten erzählen und vieles mehr!
+                </div>
+            </div>
+        </div>
+        
+        <div class="typing-indicator" id="typingIndicator">
+            Der KI-Assistent denkt nach...
+        </div>
+        
+        <div class="input-container">
+            <input type="text" id="messageInput" class="message-input" placeholder="Stelle deine Frage hier..." onkeypress="handleKeyPress(event)">
+            <button class="send-button" onclick="sendMessage()">
+                <i class="bi bi-send-fill"></i> Senden
+            </button>
+        </div>
+        
+        <div class="features-panel">
+            <h3 class="features-title">Was kann ich für dich tun?</h3>
+            <div class="features-list">
+                <div class="feature-chip" onclick="suggestQuestion('Erkläre mir, was Photosynthese ist')">Etwas erklären</div>
+                <div class="feature-chip" onclick="suggestQuestion('Hilf mir bei meinen Mathe-Hausaufgaben')">Hausaufgaben-Hilfe</div>
+                <div class="feature-chip" onclick="suggestQuestion('Erzähle mir eine kurze Geschichte')">Geschichte erzählen</div>
+                <div class="feature-chip" onclick="suggestQuestion('Gib mir Tipps zum Lernen')">Lerntipps</div>
+                <div class="feature-chip" onclick="suggestQuestion('Was sind die Planeten in unserem Sonnensystem?')">Wissen</div>
+                <div class="feature-chip" onclick="suggestQuestion('Wie funktioniert ein Computer?')">Technik</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Variablen
+        const chatContainer = document.getElementById('chatContainer');
+        const messageInput = document.getElementById('messageInput');
+        const typingIndicator = document.getElementById('typingIndicator');
+        
+        // Beim Laden der Seite
+        document.addEventListener('DOMContentLoaded', function() {
+            // Füge schwebende Emojis hinzu
+            createFloatingEmojis();
+        });
+        
+        // Nachrichten senden
+        function sendMessage() {
+            const message = messageInput.value.trim();
+            if (message === '') return;
+            
+            // Füge Benutzer-Nachricht hinzu
+            addMessage(message, 'user');
+            messageInput.value = '';
+            
+            // Zeige Tipp-Indikator
+            typingIndicator.classList.add('active');
+            
+            // Sende Anfrage an Backend
+            fetch('/ask_ai', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ query: message })
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Verberge Tipp-Indikator
+                typingIndicator.classList.remove('active');
+                
+                // Füge KI-Antwort hinzu
+                addMessage(data.response, 'ai');
+            })
+            .catch(error => {
+                console.error('Fehler:', error);
+                typingIndicator.classList.remove('active');
+                addMessage('Entschuldigung, ich konnte deine Anfrage nicht verarbeiten. Bitte versuche es später noch einmal.', 'ai');
+            });
+        }
+        
+        // Nachricht zum Chat hinzufügen
+        function addMessage(content, sender) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message message-${sender}`;
+            
+            const avatarDiv = document.createElement('div');
+            avatarDiv.className = `message-avatar ${sender}-avatar`;
+            avatarDiv.textContent = sender === 'ai' ? '🤖' : '👤';
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+            contentDiv.textContent = content;
+            
+            if (sender === 'ai') {
+                messageDiv.appendChild(avatarDiv);
+                messageDiv.appendChild(contentDiv);
+            } else {
+                messageDiv.appendChild(contentDiv);
+                messageDiv.appendChild(avatarDiv);
+            }
+            
+            chatContainer.appendChild(messageDiv);
+            
+            // Scrolle zum Ende des Chats
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+        
+        // Behandle Tastaturereignisse
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+        
+        // Vorschlagsfrage einfügen
+        function suggestQuestion(question) {
+            messageInput.value = question;
+            messageInput.focus();
+        }
+        
+        // Schwebende Emojis erstellen
+        function createFloatingEmojis() {
+            const container = document.getElementById('floatingEmojis');
+            const emojis = ['🤖', '💬', '🧠', '💭', '✨', '📚', '💻', '🔍', '💡', '🎓'];
+            
+            for (let i = 0; i < 15; i++) {
+                const emoji = document.createElement('div');
+                emoji.className = 'floating-emoji';
+                emoji.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+                
+                // Zufällige Position
+                const left = Math.random() * 100;
+                emoji.style.left = `${left}%`;
+                
+                // Zufällige Verzögerung und Dauer
+                const delay = Math.random() * 15;
+                const duration = 15 + Math.random() * 20;
+                emoji.style.animationDelay = `${delay}s`;
+                emoji.style.animationDuration = `${duration}s`;
+                
+                // Zufällige Richtung (links oder rechts)
+                const direction = Math.random() > 0.5 ? 0.2 : -0.2;
+                emoji.style.setProperty('--direction', direction);
+                
+                container.appendChild(emoji);
+            }
+        }
+    </script>
+</body>
+</html> 

@@ -13,6 +13,7 @@
             --secondary-color: #FFD166;
             --tertiary-color: #06D6A0;
             --quaternary-color: #118AB2;
+            --quinary-color: #9C27B0;  /* Neues Lila für KI-Assistenten */
             --background-color: #F8F9FA;
             --text-color: #2C3E50;
             --shadow-color: rgba(0, 0, 0, 0.1);
@@ -126,6 +127,10 @@
             background: var(--quaternary-color);
         }
 
+        .menu-item:nth-child(5)::before {
+            background: var(--quinary-color);
+        }
+
         .menu-icon {
             font-size: 4rem;
             margin-bottom: 1.5rem;
@@ -177,6 +182,10 @@
             background: var(--quaternary-color);
         }
 
+        .btn-menu-5 {
+            background: var(--quinary-color);
+        }
+
         .btn-menu:hover {
             transform: translateY(-3px);
             box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
@@ -224,6 +233,13 @@
             animation-delay: -10s;
         }
 
+        .object-5 {
+            top: 60%;
+            right: 15%;
+            font-size: 4.5rem;
+            animation-delay: -5s;
+        }
+
         .footer {
             background: linear-gradient(135deg, var(--quaternary-color) 0%, var(--primary-color) 100%);
             color: white;
@@ -266,6 +282,7 @@
         <div class="floating-object object-2">🎮</div>
         <div class="floating-object object-3">🎨</div>
         <div class="floating-object object-4">🧮</div>
+        <div class="floating-object object-5">🤖</div>
 
         <div class="row">
             <div class="col-md-6 animate__animated animate__fadeInLeft">
@@ -301,6 +318,15 @@
                     <h2 class="menu-title">Mathe-Spiel</h2>
                     <p class="menu-description">Verbessere deine Mathe-Fähigkeiten mit einem unterhaltsamen Lernspiel!</p>
                     <button class="btn btn-menu btn-menu-4">Mathe üben</button>
+                </div>
+            </div>
+            
+            <div class="col-md-6 mx-auto animate__animated animate__fadeInUp">
+                <div class="menu-item" onclick="location.href='/ki-assistent'">
+                    <div class="menu-icon">🤖</div>
+                    <h2 class="menu-title">KI-Assistent</h2>
+                    <p class="menu-description">Stelle Fragen, bekomme Hilfe bei Hausaufgaben und entdecke spannendes Wissen!</p>
+                    <button class="btn btn-menu btn-menu-5">Mit KI sprechen</button>
                 </div>
             </div>
         </div>
@@ -339,7 +365,7 @@
             handleAnimations();
             
             // Füge einige zufällige Animationen für kleinere Objekte hinzu
-            const emojis = ['📚', '✏️', '🎒', '🖍️', '📏', '📐', '🧩', '🔍', '🧪', '💡'];
+            const emojis = ['📚', '✏️', '🎒', '🖍️', '📏', '📐', '🧩', '🔍', '🧪', '💡', '🤖', '💬', '🧠'];
             const container = document.querySelector('.menu-container');
             
             for (let i = 0; i < 15; i++) {

@@ -1,6 +1,9 @@
 from flask import Flask, render_template, request, jsonify
 from datetime import datetime
 import random
+import requests
+import json
+import os
 
 app = Flask(__name__)
 
@@ -150,6 +153,10 @@ password_categories = {
     "regen": "Natur", "schnee": "Natur", "wind": "Natur", "blatt": "Natur"
 }
 
+# DeepSeek API-Einstellungen
+DEEPSEEK_API_URL = "https://api.deepseek.com/v1/chat/completions"
+DEEPSEEK_API_KEY = os.environ.get("DEEPSEEK_API_KEY", "")  # API-Schlüssel über Umgebungsvariable
+
 # Hauptseite (Menü)
 @app.route('/')
 def index():
@@ -234,6 +241,65 @@ def generate_math_problem():
         "problem": problem,
         "result": result
     })
+
+# KI-Assistent
+@app.route('/ki-assistent')
+def ki_assistent():
+    return render_template('ki_assistent.html')
+
+@app.route('/ask_ai', methods=['POST'])
+def ask_ai():
+    data = request.json
+    query = data.get('query', '')
+    
+    # Wenn kein API-Schlüssel vorhanden ist, geben wir eine Nachricht zurück
+    if not DEEPSEEK_API_KEY:
+        return jsonify({
+            "response": "Entschuldigung, der KI-Assistent ist derzeit nicht verfügbar. Bitte versuche es später noch einmal."
+        })
+    
+    try:
+        # Anfrage an die DeepSeek API vorbereiten
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {DEEPSEEK_API_KEY}"
+        }
+        
+        payload = {
+            "model": "deepseek-chat",
+            "messages": [
+                {
+                    "role": "system", 
+                    "content": "Du bist ein freundlicher und hilfsbereiter KI-Assistent für Grundschüler. Erkläre Dinge auf einfache, altersgerechte Weise. Halte deine Antworten kurz, informativ und positiv. Verwende keine komplexen Fachbegriffe ohne Erklärung."
+                },
+                {
+                    "role": "user", 
+                    "content": query
+                }
+            ],
+            "temperature": 0.7,
+            "max_tokens": 500
+        }
+        
+        # Anfrage an die DeepSeek API senden
+        response = requests.post(DEEPSEEK_API_URL, headers=headers, json=payload)
+        response_data = response.json()
+        
+        # Antwort aus der API extrahieren
+        if 'choices' in response_data and len(response_data['choices']) > 0:
+            ai_response = response_data['choices'][0]['message']['content']
+        else:
+            ai_response = "Entschuldigung, ich konnte keine Antwort generieren. Bitte versuche es mit einer anderen Frage."
+            
+        return jsonify({
+            "response": ai_response
+        })
+    
+    except Exception as e:
+        print(f"Fehler bei der DeepSeek API-Anfrage: {str(e)}")
+        return jsonify({
+            "response": "Entschuldigung, bei der Verarbeitung deiner Anfrage ist ein Fehler aufgetreten. Bitte versuche es später noch einmal."
+        })
 
 if __name__ == '__main__':
     app.run(debug=True) 
