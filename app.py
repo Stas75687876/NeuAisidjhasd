@@ -101,10 +101,54 @@ themes = {
 
 # Wortliste für das Passwort-Spiel
 password_words = [
+    # Schule
     "schule", "klasse", "lehrer", "freunde", "lernen", "pause", "bücher", 
     "tafel", "kreide", "hefte", "stifte", "mathe", "deutsch", "sport", 
-    "kunst", "musik", "computer", "wissen", "rechnen", "lesen", "schreiben"
+    "kunst", "musik", "computer", "wissen", "rechnen", "lesen", "schreiben",
+    "schüler", "stundenplan", "hausaufgabe", "prüfung", "zeugnis", "direktor", 
+    "klassenzimmer", "schulhof", "bibliothek", "mensa", "grundschule",
+    
+    # Tiere
+    "katze", "hund", "maus", "pferd", "elefant", "tiger", "löwe", "giraffe",
+    "affe", "zebra", "pinguin", "fisch", "vogel", "adler", "biene", "frosch",
+    
+    # Lebensmittel
+    "apfel", "banane", "orange", "erdbeere", "pizza", "nudeln", "kartoffel",
+    "wasser", "milch", "käse", "brot", "kuchen", "schokolade", "eis", "gemüse",
+    
+    # Natur
+    "baum", "blume", "wald", "wiese", "berg", "fluss", "meer", "sonne",
+    "mond", "stern", "himmel", "wolke", "regen", "schnee", "wind", "blatt"
 ]
+
+# Kategorien für das Passwort-Spiel (für Hinweise)
+password_categories = {
+    "schule": "Schule", "klasse": "Schule", "lehrer": "Schule", "freunde": "Schule", 
+    "lernen": "Schule", "pause": "Schule", "bücher": "Schule", "tafel": "Schule", 
+    "kreide": "Schule", "hefte": "Schule", "stifte": "Schule", "mathe": "Schule", 
+    "deutsch": "Schule", "sport": "Schule", "kunst": "Schule", "musik": "Schule", 
+    "computer": "Schule", "wissen": "Schule", "rechnen": "Schule", "lesen": "Schule", 
+    "schreiben": "Schule", "schüler": "Schule", "stundenplan": "Schule", 
+    "hausaufgabe": "Schule", "prüfung": "Schule", "zeugnis": "Schule", 
+    "direktor": "Schule", "klassenzimmer": "Schule", "schulhof": "Schule", 
+    "bibliothek": "Schule", "mensa": "Schule", "grundschule": "Schule",
+    
+    "katze": "Tiere", "hund": "Tiere", "maus": "Tiere", "pferd": "Tiere", 
+    "elefant": "Tiere", "tiger": "Tiere", "löwe": "Tiere", "giraffe": "Tiere",
+    "affe": "Tiere", "zebra": "Tiere", "pinguin": "Tiere", "fisch": "Tiere", 
+    "vogel": "Tiere", "adler": "Tiere", "biene": "Tiere", "frosch": "Tiere",
+    
+    "apfel": "Lebensmittel", "banane": "Lebensmittel", "orange": "Lebensmittel", 
+    "erdbeere": "Lebensmittel", "pizza": "Lebensmittel", "nudeln": "Lebensmittel", 
+    "kartoffel": "Lebensmittel", "wasser": "Lebensmittel", "milch": "Lebensmittel", 
+    "käse": "Lebensmittel", "brot": "Lebensmittel", "kuchen": "Lebensmittel", 
+    "schokolade": "Lebensmittel", "eis": "Lebensmittel", "gemüse": "Lebensmittel",
+    
+    "baum": "Natur", "blume": "Natur", "wald": "Natur", "wiese": "Natur", 
+    "berg": "Natur", "fluss": "Natur", "meer": "Natur", "sonne": "Natur",
+    "mond": "Natur", "stern": "Natur", "himmel": "Natur", "wolke": "Natur", 
+    "regen": "Natur", "schnee": "Natur", "wind": "Natur", "blatt": "Natur"
+}
 
 # Hauptseite (Menü)
 @app.route('/')
@@ -135,7 +179,12 @@ def spiel():
 @app.route('/get_word', methods=['GET'])
 def get_word():
     word = random.choice(password_words)
-    return jsonify({"word": word})
+    category = password_categories.get(word, "Allgemein")
+    return jsonify({
+        "word": word,
+        "category": category,
+        "length": len(word)
+    })
 
 # Stundenplan
 @app.route('/stundenplan')

@@ -71,6 +71,120 @@
             font-weight: bold;
         }
 
+        .category-badge {
+            display: inline-block;
+            background-color: var(--primary-color);
+            color: var(--text-color);
+            padding: 5px 15px;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+            font-weight: bold;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .difficulty-selector {
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .difficulty-btn {
+            background-color: #f8f9fa;
+            border: 2px solid var(--primary-color);
+            color: var(--text-color);
+            padding: 8px 20px;
+            margin: 0 5px;
+            border-radius: 50px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .difficulty-btn:hover, .difficulty-btn.active {
+            background-color: var(--primary-color);
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .correct-letter {
+            color: #06D6A0;
+            font-weight: bold;
+            border-bottom-color: #06D6A0;
+        }
+        
+        .wrong-position-letter {
+            color: #FFD166;
+            font-weight: bold;
+            border-bottom-color: #FFD166;
+        }
+        
+        .wrong-letter {
+            color: #E63946;
+            border-bottom-color: #E63946;
+        }
+        
+        .letter-feedback {
+            margin-top: 10px;
+            text-align: center;
+        }
+        
+        .letter-feedback .letter-box {
+            display: inline-block;
+            width: 40px;
+            height: 50px;
+            margin: 0 5px;
+            border: 2px solid #e9ecef;
+            border-radius: 5px;
+            text-align: center;
+            font-size: 1.8rem;
+            font-weight: bold;
+            line-height: 45px;
+            position: relative;
+            animation: flipIn 0.5s;
+            transform-style: preserve-3d;
+        }
+        
+        @keyframes flipIn {
+            0% { transform: rotateY(90deg); opacity: 0; }
+            100% { transform: rotateY(0deg); opacity: 1; }
+        }
+        
+        .help-panel {
+            text-align: center;
+            margin: 20px 0;
+            background-color: rgba(255, 255, 255, 0.7);
+            border-radius: 15px;
+            padding: 15px;
+            display: none;
+        }
+        
+        .help-panel h4 {
+            color: var(--accent-color);
+            margin-bottom: 15px;
+        }
+        
+        .help-panel p {
+            margin-bottom: 10px;
+        }
+        
+        .help-toggle {
+            background: none;
+            border: none;
+            color: var(--accent-color);
+            font-size: 1.2rem;
+            cursor: pointer;
+            text-decoration: underline;
+            margin-top: 10px;
+        }
+
         .guess-container {
             margin: 30px 0;
         }
@@ -308,14 +422,26 @@
         
         <p class="game-description animate__animated animate__fadeIn">
             Willkommen beim Passwort-Spiel! Versuche, das geheime Wort zu erraten. Du hast 6 Versuche.
-            Nach jedem Versuch erhältst du einen Hinweis, wie viele Buchstaben richtig sind.
+            Grüne Buchstaben sind richtig, gelbe Buchstaben sind im Wort an einer anderen Stelle, rote sind falsch.
         </p>
+        
+        <div class="difficulty-selector">
+            <button class="difficulty-btn active" data-difficulty="easy">Leicht</button>
+            <button class="difficulty-btn" data-difficulty="medium">Mittel</button>
+            <button class="difficulty-btn" data-difficulty="hard">Schwer</button>
+        </div>
+        
+        <div class="category-container text-center">
+            <span class="category-badge" id="categoryBadge">Kategorie wird geladen...</span>
+        </div>
         
         <div class="password-display" id="passwordDisplay"></div>
         
         <div class="hint-container">
             <p class="hint-text" id="hintText">Drücke auf "Neues Spiel", um zu starten!</p>
         </div>
+        
+        <div class="letter-feedback" id="letterFeedback"></div>
         
         <div class="guess-container animate__animated animate__fadeInUp">
             <input type="text" class="guess-input" id="guessInput" placeholder="Dein Versuch..." maxlength="15">
@@ -324,6 +450,16 @@
                 <button class="btn btn-new-game" id="newGameButton">Neues Spiel</button>
             </div>
         </div>
+        
+        <div class="help-panel" id="helpPanel">
+            <h4>Spielregeln</h4>
+            <p><span style="color:#06D6A0;font-weight:bold;">Grüne</span> Buchstaben sind korrekt und an der richtigen Position.</p>
+            <p><span style="color:#FFD166;font-weight:bold;">Gelbe</span> Buchstaben sind im Wort vorhanden, aber an der falschen Position.</p>
+            <p><span style="color:#E63946;font-weight:bold;">Rote</span> Buchstaben sind nicht im gesuchten Wort.</p>
+            <p>Du hast 6 Versuche, um das Wort zu erraten. Viel Spaß!</p>
+        </div>
+        
+        <button class="help-toggle" id="helpToggle">Spielregeln anzeigen</button>
         
         <div class="game-over-container" id="gameOverContainer">
             <h2 class="game-over-title" id="gameOverTitle"></h2>
@@ -345,10 +481,12 @@
     
     <script>
         let currentWord = '';
+        let currentCategory = '';
         let attempts = 0;
         let maxAttempts = 6;
         let gameOver = false;
         let score = 0;
+        let difficulty = 'easy';
         
         const guessInput = document.getElementById('guessInput');
         const guessButton = document.getElementById('guessButton');
@@ -361,6 +499,11 @@
         const gameOverTitle = document.getElementById('gameOverTitle');
         const gameOverMessage = document.getElementById('gameOverMessage');
         const confettiContainer = document.getElementById('confettiContainer');
+        const categoryBadge = document.getElementById('categoryBadge');
+        const letterFeedback = document.getElementById('letterFeedback');
+        const difficultyButtons = document.querySelectorAll('.difficulty-btn');
+        const helpToggle = document.getElementById('helpToggle');
+        const helpPanel = document.getElementById('helpPanel');
         
         // Deaktiviere den Raten-Button am Anfang
         guessButton.disabled = true;
@@ -370,6 +513,35 @@
             if (event.key === 'Enter' && !guessButton.disabled) {
                 makeGuess();
             }
+        });
+        
+        // Hilfepanel ein-/ausblenden
+        helpToggle.addEventListener('click', function() {
+            if (helpPanel.style.display === 'block') {
+                helpPanel.style.display = 'none';
+                helpToggle.textContent = 'Spielregeln anzeigen';
+            } else {
+                helpPanel.style.display = 'block';
+                helpToggle.textContent = 'Spielregeln ausblenden';
+            }
+        });
+        
+        // Schwierigkeitsgrad wählen
+        difficultyButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                if (gameOver || attempts === 0) {
+                    // Nur Schwierigkeitsgrad ändern, wenn das Spiel noch nicht läuft oder neu gestartet werden soll
+                    difficultyButtons.forEach(btn => btn.classList.remove('active'));
+                    this.classList.add('active');
+                    difficulty = this.dataset.difficulty;
+                    
+                    if (gameOver) {
+                        startNewGame();
+                    }
+                } else {
+                    alert('Du kannst den Schwierigkeitsgrad nur vor dem Spiel oder nach einem Neustart ändern!');
+                }
+            });
         });
         
         // Buttons mit Event-Listenern versehen
@@ -382,11 +554,27 @@
                 .then(response => response.json())
                 .then(data => {
                     currentWord = data.word;
-                    displayPasswordPlaceholder();
+                    currentCategory = data.category;
+                    
+                    // Schwierigkeitsgrad anwenden
+                    if (difficulty === 'hard') {
+                        // Hart: Keine Hinweise
+                        categoryBadge.textContent = 'Kategorie: ???';
+                        displayPasswordPlaceholder(false);
+                    } else if (difficulty === 'medium') {
+                        // Mittel: Nur Kategorie anzeigen
+                        categoryBadge.textContent = 'Kategorie: ' + currentCategory;
+                        displayPasswordPlaceholder(false);
+                    } else {
+                        // Leicht: Kategorie und Wortlänge anzeigen
+                        categoryBadge.textContent = 'Kategorie: ' + currentCategory;
+                        displayPasswordPlaceholder(true);
+                    }
+                    
                     guessButton.disabled = false;
                     guessInput.disabled = false;
                     guessInput.focus();
-                    console.log("Neues Wort: " + currentWord); // Für Testzwecke
+                    // Nur für Testzwecke: console.log("Neues Wort: " + currentWord);
                 })
                 .catch(error => {
                     console.error('Fehler beim Laden des Wortes:', error);
@@ -395,14 +583,24 @@
         }
         
         // Platzhalter für das Passwort anzeigen
-        function displayPasswordPlaceholder() {
+        function displayPasswordPlaceholder(showLength) {
             passwordDisplay.innerHTML = '';
-            for (let i = 0; i < currentWord.length; i++) {
-                const letter = document.createElement('span');
-                letter.className = 'letter';
-                letter.textContent = '_';
-                letter.style.animationDelay = `${i * 0.1}s`;
-                passwordDisplay.appendChild(letter);
+            
+            if (showLength) {
+                for (let i = 0; i < currentWord.length; i++) {
+                    const letter = document.createElement('span');
+                    letter.className = 'letter';
+                    letter.textContent = '_';
+                    letter.style.animationDelay = `${i * 0.1}s`;
+                    passwordDisplay.appendChild(letter);
+                }
+            } else {
+                // Bei mittlerem und schwerem Schwierigkeitsgrad keine Platzhalter anzeigen
+                const message = document.createElement('div');
+                message.textContent = '? ? ? ? ?';
+                message.style.fontSize = '2rem';
+                message.style.letterSpacing = '5px';
+                passwordDisplay.appendChild(message);
             }
         }
         
@@ -415,6 +613,63 @@
                 letter.textContent = currentWord[i].toUpperCase();
                 letter.style.animationDelay = `${i * 0.1}s`;
                 passwordDisplay.appendChild(letter);
+            }
+        }
+        
+        // Zeige Buchstaben-Feedback
+        function showLetterFeedback(guess) {
+            letterFeedback.innerHTML = '';
+            
+            const wordChars = currentWord.split('');
+            const guessChars = guess.split('');
+            const letterStates = new Array(guessChars.length).fill('wrong');
+            
+            // Zuerst exakte Übereinstimmungen finden (grün)
+            for (let i = 0; i < guessChars.length; i++) {
+                if (i < wordChars.length && guessChars[i] === wordChars[i]) {
+                    letterStates[i] = 'correct';
+                    // Markiere den Buchstaben als verwendet
+                    wordChars[i] = null;
+                }
+            }
+            
+            // Dann Buchstaben an falscher Position finden (gelb)
+            for (let i = 0; i < guessChars.length; i++) {
+                if (letterStates[i] !== 'correct') {
+                    const indexInWord = wordChars.indexOf(guessChars[i]);
+                    if (indexInWord !== -1) {
+                        letterStates[i] = 'wrong-position';
+                        // Markiere den Buchstaben als verwendet
+                        wordChars[indexInWord] = null;
+                    }
+                }
+            }
+            
+            // Buchstaben anzeigen mit entsprechender Farbe
+            for (let i = 0; i < guessChars.length; i++) {
+                const letterBox = document.createElement('div');
+                letterBox.className = 'letter-box';
+                letterBox.textContent = guessChars[i].toUpperCase();
+                
+                switch (letterStates[i]) {
+                    case 'correct':
+                        letterBox.style.backgroundColor = '#06D6A0';
+                        letterBox.style.borderColor = '#06D6A0';
+                        letterBox.style.color = 'white';
+                        break;
+                    case 'wrong-position':
+                        letterBox.style.backgroundColor = '#FFD166';
+                        letterBox.style.borderColor = '#FFD166';
+                        letterBox.style.color = 'white';
+                        break;
+                    default:
+                        letterBox.style.backgroundColor = '#E63946';
+                        letterBox.style.borderColor = '#E63946';
+                        letterBox.style.color = 'white';
+                }
+                
+                letterBox.style.animationDelay = `${i * 0.15}s`;
+                letterFeedback.appendChild(letterBox);
             }
         }
         
@@ -431,6 +686,9 @@
             
             attempts++;
             
+            // Buchstaben-Feedback zeigen
+            showLetterFeedback(guess);
+            
             // Füge den Versuch zur Liste hinzu
             const attemptItem = document.createElement('div');
             attemptItem.textContent = guess;
@@ -445,20 +703,41 @@
                 
                 // Berechne Ähnlichkeit (wie viele Buchstaben sind richtig)
                 let correctLetters = 0;
+                let correctPositions = 0;
                 const guessChars = guess.split('');
                 const wordChars = currentWord.split('');
                 
+                // Anzahl korrekter Buchstaben an korrekter Position zählen
                 for (let i = 0; i < Math.min(guessChars.length, wordChars.length); i++) {
                     if (guessChars[i] === wordChars[i]) {
-                        correctLetters++;
+                        correctPositions++;
                     }
                 }
                 
-                // Zeige Hinweis
-                if (guess.length !== currentWord.length) {
-                    hintText.textContent = `Das Wort hat ${currentWord.length} Buchstaben. Dein Versuch hat ${guess.length} Buchstaben.`;
+                // Anzahl korrekter Buchstaben insgesamt zählen (mit Duplikaten)
+                const wordCharsCopy = [...wordChars];
+                for (let i = 0; i < guessChars.length; i++) {
+                    const index = wordCharsCopy.indexOf(guessChars[i]);
+                    if (index !== -1) {
+                        correctLetters++;
+                        wordCharsCopy.splice(index, 1); // Buchstabe als benutzt markieren
+                    }
+                }
+                
+                // Zeige Hinweise basierend auf dem Schwierigkeitsgrad
+                if (difficulty === 'hard') {
+                    // Bei schwerem Schwierigkeitsgrad nur minimale Hinweise
+                    hintText.textContent = `Versuch ${attempts} von ${maxAttempts}`;
+                } else if (difficulty === 'medium') {
+                    // Bei mittlerem Schwierigkeitsgrad zeige korrekte Positionen
+                    hintText.textContent = `${correctPositions} Buchstaben an der richtigen Position`;
                 } else {
-                    hintText.textContent = `${correctLetters} von ${currentWord.length} Buchstaben sind richtig.`;
+                    // Bei leichtem Schwierigkeitsgrad detaillierte Hinweise
+                    if (guess.length !== currentWord.length) {
+                        hintText.textContent = `Das Wort hat ${currentWord.length} Buchstaben. Dein Versuch hat ${guess.length} Buchstaben.`;
+                    } else {
+                        hintText.textContent = `${correctPositions} Buchstaben an richtiger Position, insgesamt ${correctLetters} richtige Buchstaben.`;
+                    }
                 }
                 
                 // Prüfe, ob maximale Versuche erreicht
@@ -483,7 +762,11 @@
             
             if (isWin) {
                 // Gewonnen
-                const pointsEarned = Math.max(1, maxAttempts - attempts + 1) * 10;
+                let difficultyMultiplier = 1;
+                if (difficulty === 'medium') difficultyMultiplier = 1.5;
+                if (difficulty === 'hard') difficultyMultiplier = 2;
+                
+                const pointsEarned = Math.floor(Math.max(1, maxAttempts - attempts + 1) * 10 * difficultyMultiplier);
                 score += pointsEarned;
                 scoreValue.textContent = score;
                 
@@ -505,6 +788,7 @@
         function startNewGame() {
             attempts = 0;
             gameOver = false;
+            letterFeedback.innerHTML = '';
             
             // UI zurücksetzen
             guessInput.value = '';
@@ -522,10 +806,27 @@
         function createConfetti() {
             confettiContainer.innerHTML = '';
             
-            for (let i = 0; i < 10; i++) {
+            for (let i = 0; i < 50; i++) {  // Mehr Konfetti für mehr Spaß!
                 const confetti = document.createElement('div');
                 confetti.className = 'confetti';
-                confetti.style.left = `${i * 10}%`;
+                
+                // Zufällige Position und Farbe
+                confetti.style.left = `${Math.random() * 100}%`;
+                confetti.style.backgroundColor = ['#f2d74e', '#95c3de', '#ff9a91', '#06D6A0', '#118AB2'][Math.floor(Math.random() * 5)];
+                
+                // Zufällige Größe
+                const size = Math.random() * 10 + 5;
+                confetti.style.width = `${size}px`;
+                confetti.style.height = `${size}px`;
+                
+                // Zufällige Form (Kreis oder Quadrat)
+                if (Math.random() > 0.5) {
+                    confetti.style.borderRadius = '50%';
+                }
+                
+                confetti.style.animationDelay = `${Math.random() * 3}s`;
+                confetti.style.animationDuration = `${Math.random() * 2 + 3}s`;
+                
                 confettiContainer.appendChild(confetti);
             }
         }
