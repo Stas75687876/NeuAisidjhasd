@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mein Steckbrief</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #F06292;
+            --secondary-color: #F8BBD0;
+            --gradient: linear-gradient(135deg, #F06292 0%, #F8BBD0 100%);
+            --accent-color: #D81B60;
+        }
+
+        body {
+            background: var(--gradient);
+            min-height: 100vh;
+            font-family: 'Comic Neue', cursive;
+            padding: 20px;
+        }
+
+        .gender-selection {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .gender-button {
+            background: white;
+            border: 3px solid var(--primary-color);
+            padding: 15px 30px;
+            border-radius: 20px;
+            font-size: 1.5em;
+            margin: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .gender-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--gradient);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .gender-button:hover::before {
+            opacity: 0.1;
+        }
+
+        .gender-button.active {
+            background: var(--gradient);
+            color: white;
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .gender-button.active::before {
+            opacity: 1;
+        }
+
+        .container {
+            position: relative;
+            z-index: 10;
+            background-color: rgba(255, 255, 255, 0.92);
+            border-radius: 30px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1), 
+                        0 0 60px rgba(255,255,255,0.5) inset;
+            margin-top: 30px;
+            border: 3px solid var(--accent-color);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+        }
+
+        .question-container {
+            display: none;
+            transform: scale(0.9);
+            opacity: 0;
+            transition: all 0.5s ease;
+        }
+
+        .question-container.active {
+            display: block;
+            transform: scale(1);
+            opacity: 1;
+        }
+
+        .progress {
+            height: 35px;
+            border-radius: 20px;
+            margin: 30px 0;
+            background: rgba(255,255,255,0.5);
+            border: 2px solid #fff;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .progress-bar {
+            background: var(--gradient);
+            border-radius: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-bar::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, 
+                rgba(255,255,255,0) 0%,
+                rgba(255,255,255,0.3) 50%,
+                rgba(255,255,255,0) 100%);
+            animation: shine 2s infinite;
+        }
+
+        .btn-next, .btn-prev {
+            background: var(--gradient);
+            border: none;
+            padding: 15px 40px;
+            border-radius: 25px;
+            font-size: 1.3em;
+            margin: 15px;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        }
+
+        .btn-next:hover, .btn-prev:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        }
+
+        .btn-next:active, .btn-prev:active {
+            transform: translateY(1px);
+        }
+
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 40px;
+            font-size: 3em;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+            position: relative;
+        }
+
+        h1::before, h1::after {
+            content: '✨';
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 0.8em;
+        }
+
+        h1::before { left: -40px; }
+        h1::after { right: -40px; }
+
+        .form-control {
+            border-radius: 20px;
+            padding: 20px;
+            font-size: 1.2em;
+            border: 3px solid var(--secondary-color);
+            background: rgba(255,255,255,0.9);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+            transform: translateY(-2px);
+        }
+
+        .question-text {
+            color: #2c3e50;
+            margin-bottom: 25px;
+            font-size: 1.8em;
+            text-align: center;
+            position: relative;
+            display: inline-block;
+        }
+
+        .question-number {
+            background: var(--primary-color);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-size: 1.2em;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+
+        .question-icon {
+            font-size: 1.5em;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+
+        @keyframes float {
+            0% { 
+                transform: translateY(0) translateX(0) rotate(0deg); 
+                opacity: 0.25;
+            }
+            25% { 
+                transform: translateY(-70px) translateX(35px) rotate(8deg); 
+                opacity: 0.3;
+            }
+            50% { 
+                transform: translateY(-140px) translateX(0) rotate(0deg); 
+                opacity: 0.25;
+            }
+            75% { 
+                transform: translateY(-70px) translateX(-35px) rotate(-8deg); 
+                opacity: 0.3;
+            }
+            100% { 
+                transform: translateY(0) translateX(0) rotate(0deg); 
+                opacity: 0.25;
+            }
+        }
+
+        .floating-emoji {
+            position: fixed;
+            font-size: 3em;
+            animation: float 8s ease-in-out infinite;
+            z-index: -1;
+            pointer-events: none;
+            opacity: 0.25;
+            filter: blur(0.5px);
+            transition: opacity 0.5s ease;
+        }
+
+        #emojis {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: -1;
+            overflow: hidden;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .back-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: white;
+            border: 3px solid var(--primary-color);
+            padding: 10px 20px;
+            border-radius: 50px;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            z-index: 100;
+            text-decoration: none;
+            color: var(--accent-color);
+            font-weight: bold;
+        }
+
+        .back-button:hover {
+            background: var(--primary-color);
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+        @keyframes shine {
+            from { transform: translateX(-100%); }
+            to { transform: translateX(100%); }
+        }
+    </style>
+</head>
+<body>
+    <a href="/" class="back-button">← Zurück zum Menü</a>
+    <div id="emojis"></div>
+    <div class="container">
+        <h1>✨ Mein Steckbrief ✨</h1>
+
+        <div class="gender-selection">
+            <button type="button" class="gender-button active" data-theme="girl">
+                👧 Ich bin ein Mädchen
+            </button>
+            <button type="button" class="gender-button" data-theme="boy">
+                👦 Ich bin ein Junge
+            </button>
+        </div>
+        
+        <div class="progress">
+            <div class="progress-bar" role="progressbar" style="width: 10%;" aria-valuenow="10" aria-valuemin="0" aria-valuemax="100">10%</div>
+        </div>
+
+        <form id="profileForm">
+            {% for i in range(questions|length) %}
+            <div class="question-container {% if i == 0 %}active{% endif %}" data-question="{{ i }}">
+                <div class="text-center mb-4">
+                    <span class="question-number">{{ i + 1 }}</span>
+                    <span class="question-icon">{{ questions[i].icon }}</span>
+                    <span class="question-text">{{ questions[i].text }}</span>
+                </div>
+                <div class="form-group">
+                    <input type="text" class="form-control" name="answer{{ questions[i].id }}" required placeholder="Deine Antwort...">
+                </div>
+                <div class="text-center mt-4">
+                    {% if i > 0 %}
+                    <button type="button" class="btn btn-prev" onclick="previousQuestion({{ i }})">← Zurück</button>
+                    {% endif %}
+                    {% if i < questions|length - 1 %}
+                    <button type="button" class="btn btn-next" onclick="nextQuestion({{ i }})">Weiter →</button>
+                    {% else %}
+                    <button type="button" class="btn btn-next" onclick="generateProfile()">✨ Steckbrief erstellen! ✨</button>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </form>
+    </div>
+
+    <script>
+        // Theme-Verwaltung
+        const themes = {{ themes|tojson }};
+        let currentTheme = 'girl';
+
+        function updateTheme(theme) {
+            currentTheme = theme;
+            const themeData = themes[theme];
+            document.documentElement.style.setProperty('--primary-color', themeData.primary);
+            document.documentElement.style.setProperty('--secondary-color', themeData.secondary);
+            document.documentElement.style.setProperty('--gradient', themeData.gradient);
+            document.documentElement.style.setProperty('--accent-color', themeData.accent);
+
+            // Update Button-Styles
+            document.querySelectorAll('.gender-button').forEach(button => {
+                button.classList.remove('active');
+                if (button.dataset.theme === theme) {
+                    button.classList.add('active');
+                }
+            });
+
+            // Entferne alle existierenden Emojis
+            const emojisContainer = document.getElementById('emojis');
+            emojisContainer.innerHTML = '';
+        }
+
+        document.querySelectorAll('.gender-button').forEach(button => {
+            button.addEventListener('click', () => {
+                updateTheme(button.dataset.theme);
+            });
+        });
+
+        // Verbesserte Floating Emojis
+        function createFloatingEmoji() {
+            const emoji = document.createElement('div');
+            emoji.className = 'floating-emoji';
+            const themeData = themes[currentTheme];
+            const emojis = themeData.decorative_emojis;
+            emoji.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+            
+            // Verbesserte zufällige Position
+            const padding = 50; // Kleinerer Randabstand
+            const randomX = padding + Math.random() * (window.innerWidth - 2 * padding);
+            const randomY = padding + Math.random() * (window.innerHeight - 2 * padding);
+            
+            emoji.style.left = randomX + 'px';
+            emoji.style.top = randomY + 'px';
+            
+            // Zufällige Animation-Verzögerung und Dauer
+            const delay = Math.random() * 2;
+            const duration = 8 + Math.random() * 4; // Noch längere Animation
+            emoji.style.animationDelay = delay + 's';
+            emoji.style.animationDuration = duration + 's';
+            
+            // Größere zufällige Startgröße
+            const baseSize = 3;
+            const randomSize = baseSize + Math.random() * 2;
+            emoji.style.fontSize = randomSize + 'em';
+            
+            document.getElementById('emojis').appendChild(emoji);
+            
+            // Sanfteres Ausblenden
+            setTimeout(() => {
+                emoji.style.opacity = '0';
+                emoji.style.transition = 'opacity 1s ease';
+                setTimeout(() => emoji.remove(), 1000);
+            }, duration * 1000);
+        }
+
+        // Mehr Emojis im Hintergrund
+        setInterval(createFloatingEmoji, 1500);  // Häufigere Emojis
+        
+        // Initial mehr Emojis erstellen
+        for(let i = 0; i < 12; i++) {  // Mehr initiale Emojis
+            setTimeout(() => createFloatingEmoji(), i * 200);  // Verzögerter Start
+        }
+
+        function updateProgress(questionIndex) {
+            const progress = ((questionIndex + 1) / {{ questions|length }}) * 100;
+            const progressBar = document.querySelector('.progress-bar');
+            progressBar.style.width = progress + '%';
+            progressBar.setAttribute('aria-valuenow', progress);
+            progressBar.textContent = Math.round(progress) + '%';
+        }
+
+        function nextQuestion(currentIndex) {
+            const currentQuestion = {{ questions|tojson }}[currentIndex];
+            const input = document.forms.profileForm['answer' + currentQuestion.id];
+            
+            if (!input.value.trim()) {
+                alert('Bitte beantworte die Frage! ' + currentQuestion.icon);
+                return;
+            }
+            
+            const currentContainer = document.querySelector(`[data-question="${currentIndex}"]`);
+            const nextContainer = document.querySelector(`[data-question="${currentIndex + 1}"]`);
+            
+            if (currentContainer && nextContainer) {
+                currentContainer.classList.remove('active');
+                nextContainer.classList.add('active');
+                updateProgress(currentIndex + 1);
+                createFloatingEmoji();
+            }
+        }
+
+        function previousQuestion(currentIndex) {
+            const currentContainer = document.querySelector(`[data-question="${currentIndex}"]`);
+            const prevContainer = document.querySelector(`[data-question="${currentIndex - 1}"]`);
+            
+            if (currentContainer && prevContainer) {
+                currentContainer.classList.remove('active');
+                prevContainer.classList.add('active');
+                updateProgress(currentIndex - 1);
+            }
+        }
+
+        function generateProfile() {
+            const form = document.getElementById('profileForm');
+            const answers = {};
+            
+            // Sammle alle Antworten
+            {{ questions|tojson }}.forEach(question => {
+                const input = form['answer' + question.id];
+                if (!input.value.trim()) {
+                    alert('Bitte beantworte alle Fragen! ' + question.icon);
+                    return;
+                }
+                answers[question.id] = input.value;
+            });
+            
+            // Sende nur wenn alle Fragen beantwortet wurden
+            if (Object.keys(answers).length === {{ questions|length }}) {
+                fetch('/generate_profile', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        answers: answers,
+                        theme: currentTheme
+                    })
+                })
+                .then(response => response.text())
+                .then(html => {
+                    document.open();
+                    document.write(html);
+                    document.close();
+                });
+            }
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html> 

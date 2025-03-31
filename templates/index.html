@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Schulprojekt Startseite</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <style>
+        :root {
+            --primary-color: #FF6B6B;
+            --secondary-color: #FFD166;
+            --tertiary-color: #06D6A0;
+            --quaternary-color: #118AB2;
+            --background-color: #F8F9FA;
+            --text-color: #2C3E50;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            background: linear-gradient(135deg, #f6f9fc 0%, #e3e8ef 100%);
+            min-height: 100vh;
+            font-family: 'Comic Neue', cursive;
+            padding: 0;
+            margin: 0;
+            overflow-x: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--quaternary-color) 100%);
+            color: white;
+            padding: 2rem 0;
+            text-align: center;
+            box-shadow: 0 4px 20px var(--shadow-color);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: "";
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            right: -10px;
+            bottom: -10px;
+            background: url('data:image/svg+xml;utf8,<svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M10 10 L90 10 L90 90 L10 90 Z" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="2"/></svg>');
+            background-size: 50px 50px;
+            z-index: 0;
+            opacity: 0.3;
+            animation: patternSlide 60s linear infinite;
+        }
+
+        @keyframes patternSlide {
+            0% { background-position: 0 0; }
+            100% { background-position: 100px 100px; }
+        }
+
+        .title {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            position: relative;
+            z-index: 1;
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        .subtitle {
+            font-size: 1.5rem;
+            opacity: 0.9;
+            margin-bottom: 0;
+            position: relative;
+            z-index: 1;
+        }
+
+        .menu-container {
+            padding: 3rem 0;
+            position: relative;
+        }
+
+        .menu-item {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 30px;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px var(--shadow-color);
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+            min-height: 280px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .menu-item:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 40px var(--shadow-color);
+        }
+
+        .menu-item::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 8px;
+            border-radius: 4px 4px 0 0;
+        }
+
+        .menu-item:nth-child(1)::before {
+            background: var(--primary-color);
+        }
+
+        .menu-item:nth-child(2)::before {
+            background: var(--secondary-color);
+        }
+
+        .menu-item:nth-child(3)::before {
+            background: var(--tertiary-color);
+        }
+
+        .menu-item:nth-child(4)::before {
+            background: var(--quaternary-color);
+        }
+
+        .menu-icon {
+            font-size: 4rem;
+            margin-bottom: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .menu-item:hover .menu-icon {
+            transform: scale(1.2);
+        }
+
+        .menu-title {
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            color: var(--text-color);
+        }
+
+        .menu-description {
+            color: #6c757d;
+            font-size: 1.1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .btn-menu {
+            padding: 0.8rem 2rem;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            border: none;
+            color: white;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-menu-1 {
+            background: var(--primary-color);
+        }
+
+        .btn-menu-2 {
+            background: var(--secondary-color);
+            color: var(--text-color);
+        }
+
+        .btn-menu-3 {
+            background: var(--tertiary-color);
+        }
+
+        .btn-menu-4 {
+            background: var(--quaternary-color);
+        }
+
+        .btn-menu:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .floating-object {
+            position: absolute;
+            z-index: 0;
+            opacity: 0.4;
+            pointer-events: none;
+            animation: float 15s ease-in-out infinite alternate;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-30px) rotate(10deg); }
+            100% { transform: translateY(15px) rotate(-5deg); }
+        }
+
+        .object-1 {
+            top: 20%;
+            left: 5%;
+            font-size: 5rem;
+            animation-delay: 0s;
+        }
+
+        .object-2 {
+            top: 40%;
+            right: 8%;
+            font-size: 4rem;
+            animation-delay: -3s;
+        }
+
+        .object-3 {
+            bottom: 15%;
+            left: 10%;
+            font-size: 6rem;
+            animation-delay: -7s;
+        }
+
+        .object-4 {
+            bottom: 30%;
+            right: 7%;
+            font-size: 5rem;
+            animation-delay: -10s;
+        }
+
+        .footer {
+            background: linear-gradient(135deg, var(--quaternary-color) 0%, var(--primary-color) 100%);
+            color: white;
+            padding: 2rem 0;
+            text-align: center;
+            box-shadow: 0 -4px 20px var(--shadow-color);
+        }
+
+        @media (max-width: 768px) {
+            .title {
+                font-size: 2.5rem;
+            }
+            
+            .subtitle {
+                font-size: 1.2rem;
+            }
+            
+            .menu-item {
+                min-height: 250px;
+            }
+            
+            .menu-icon {
+                font-size: 3rem;
+            }
+            
+            .menu-title {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1 class="title animate__animated animate__fadeInDown">✨ Mein Schulprojekt ✨</h1>
+        <p class="subtitle animate__animated animate__fadeInUp">Entdecke spannende Aktivitäten und Lernhilfen!</p>
+    </div>
+
+    <div class="container menu-container">
+        <div class="floating-object object-1">📚</div>
+        <div class="floating-object object-2">🎮</div>
+        <div class="floating-object object-3">🎨</div>
+        <div class="floating-object object-4">🧮</div>
+
+        <div class="row">
+            <div class="col-md-6 animate__animated animate__fadeInLeft">
+                <div class="menu-item" onclick="location.href='/steckbrief'">
+                    <div class="menu-icon">📝</div>
+                    <h2 class="menu-title">Steckbrief</h2>
+                    <p class="menu-description">Erstelle deinen persönlichen Steckbrief mit lustigen Fragen und schönem Design!</p>
+                    <button class="btn btn-menu btn-menu-1">Steckbrief erstellen</button>
+                </div>
+            </div>
+            
+            <div class="col-md-6 animate__animated animate__fadeInRight">
+                <div class="menu-item" onclick="location.href='/spiel'">
+                    <div class="menu-icon">🎮</div>
+                    <h2 class="menu-title">Passwort-Spiel</h2>
+                    <p class="menu-description">Spiele ein spannendes Spiel, bei dem du Passwörter erraten musst!</p>
+                    <button class="btn btn-menu btn-menu-2">Jetzt spielen</button>
+                </div>
+            </div>
+            
+            <div class="col-md-6 animate__animated animate__fadeInLeft">
+                <div class="menu-item" onclick="location.href='/stundenplan'">
+                    <div class="menu-icon">📅</div>
+                    <h2 class="menu-title">Stundenplan</h2>
+                    <p class="menu-description">Erstelle und verwalte deinen eigenen Stundenplan ganz einfach!</p>
+                    <button class="btn btn-menu btn-menu-3">Zum Stundenplan</button>
+                </div>
+            </div>
+            
+            <div class="col-md-6 animate__animated animate__fadeInRight">
+                <div class="menu-item" onclick="location.href='/mathe-spiel'">
+                    <div class="menu-icon">🧮</div>
+                    <h2 class="menu-title">Mathe-Spiel</h2>
+                    <p class="menu-description">Verbessere deine Mathe-Fähigkeiten mit einem unterhaltsamen Lernspiel!</p>
+                    <button class="btn btn-menu btn-menu-4">Mathe üben</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>© 2023 Mein Schulprojekt | Mit ❤️ erstellt von Schülern für Schüler</p>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Animation beim Scrollen
+        function isElementInViewport(el) {
+            const rect = el.getBoundingClientRect();
+            return (
+                rect.top >= 0 &&
+                rect.left >= 0 &&
+                rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
+                rect.right <= (window.innerWidth || document.documentElement.clientWidth)
+            );
+        }
+
+        function handleAnimations() {
+            const menuItems = document.querySelectorAll('.menu-item');
+            
+            menuItems.forEach(item => {
+                if (isElementInViewport(item) && !item.classList.contains('animated')) {
+                    item.classList.add('animated');
+                    item.style.opacity = '1';
+                }
+            });
+        }
+
+        // Initialisiere Elemente
+        document.addEventListener('DOMContentLoaded', function() {
+            handleAnimations();
+            
+            // Füge einige zufällige Animationen für kleinere Objekte hinzu
+            const emojis = ['📚', '✏️', '🎒', '🖍️', '📏', '📐', '🧩', '🔍', '🧪', '💡'];
+            const container = document.querySelector('.menu-container');
+            
+            for (let i = 0; i < 15; i++) {
+                const smallObject = document.createElement('div');
+                smallObject.className = 'floating-object';
+                smallObject.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+                smallObject.style.fontSize = Math.random() * 2 + 1 + 'rem';
+                smallObject.style.top = Math.random() * 100 + '%';
+                smallObject.style.left = Math.random() * 100 + '%';
+                smallObject.style.animationDelay = Math.random() * -15 + 's';
+                smallObject.style.opacity = Math.random() * 0.2 + 0.1;
+                container.appendChild(smallObject);
+            }
+        });
+
+        window.addEventListener('scroll', handleAnimations);
+    </script>
+</body>
+</html> 

@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Passwort-Spiel</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <style>
+        :root {
+            --primary-color: #FFD166;
+            --secondary-color: #F8961E;
+            --accent-color: #F3722C;
+            --text-color: #463F3A;
+            --background-color: #F8F9FA;
+        }
+
+        body {
+            background: linear-gradient(135deg, #FFD166 0%, #F8961E 100%);
+            min-height: 100vh;
+            font-family: 'Comic Neue', cursive;
+            padding: 20px;
+            color: var(--text-color);
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 40px auto;
+            background-color: rgba(255, 255, 255, 0.92);
+            border-radius: 30px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1), 
+                        0 0 60px rgba(255,255,255,0.5) inset;
+            border: 3px solid var(--accent-color);
+        }
+
+        .game-title {
+            text-align: center;
+            font-size: 3rem;
+            margin-bottom: 30px;
+            color: var(--accent-color);
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .game-description {
+            text-align: center;
+            font-size: 1.2rem;
+            margin-bottom: 40px;
+            line-height: 1.6;
+        }
+
+        .password-display {
+            text-align: center;
+            font-size: 2.5rem;
+            letter-spacing: 8px;
+            margin: 20px 0;
+            min-height: 60px;
+        }
+
+        .hint-container {
+            text-align: center;
+            margin: 20px 0;
+            min-height: 50px;
+        }
+
+        .hint-text {
+            color: var(--accent-color);
+            font-size: 1.4rem;
+            font-weight: bold;
+        }
+
+        .guess-container {
+            margin: 30px 0;
+        }
+
+        .guess-input {
+            border: 3px solid var(--primary-color);
+            border-radius: 15px;
+            padding: 15px;
+            font-size: 1.3rem;
+            text-align: center;
+            width: 100%;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .guess-input:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 15px rgba(243, 114, 44, 0.3);
+            outline: none;
+        }
+
+        .btn-guess, .btn-new-game {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
+            border: none;
+            padding: 12px 30px;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            margin: 0 10px;
+            transition: all 0.3s ease;
+            color: white;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .btn-guess:hover, .btn-new-game:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        }
+
+        .btn-guess:active, .btn-new-game:active {
+            transform: translateY(1px);
+        }
+
+        .btn-new-game {
+            background: linear-gradient(135deg, #06D6A0 0%, #1B9AAA 100%);
+        }
+
+        .score-container {
+            text-align: center;
+            margin: 30px 0;
+            padding: 20px;
+            background-color: rgba(255, 255, 255, 0.7);
+            border-radius: 15px;
+        }
+
+        .score-title {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            color: var(--accent-color);
+        }
+
+        .score-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .attempts-container {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .attempts-title {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+        }
+
+        .attempts-list {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .attempt-item {
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 8px 15px;
+            border-radius: 50px;
+            font-size: 1rem;
+            display: inline-block;
+            border: 2px solid;
+            transition: all 0.3s ease;
+        }
+
+        .attempt-correct {
+            border-color: #06D6A0;
+            color: #06D6A0;
+        }
+
+        .attempt-wrong {
+            border-color: #E63946;
+            color: #E63946;
+        }
+
+        .letter {
+            display: inline-block;
+            width: 40px;
+            height: 50px;
+            margin: 0 5px;
+            border-bottom: 3px solid var(--primary-color);
+            text-align: center;
+            font-size: 2rem;
+            font-weight: bold;
+            position: relative;
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .back-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: white;
+            border: 3px solid var(--primary-color);
+            padding: 10px 20px;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            z-index: 100;
+            text-decoration: none;
+            color: var(--accent-color);
+            font-weight: bold;
+        }
+
+        .back-button:hover {
+            background: var(--primary-color);
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+        .game-over-container {
+            text-align: center;
+            margin: 20px 0;
+            padding: 20px;
+            border-radius: 15px;
+            display: none;
+        }
+
+        .game-over-win {
+            background-color: rgba(6, 214, 160, 0.2);
+            border: 3px solid #06D6A0;
+        }
+
+        .game-over-lose {
+            background-color: rgba(230, 57, 70, 0.2);
+            border: 3px solid #E63946;
+        }
+
+        .game-over-title {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .game-over-message {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+        }
+
+        .confetti {
+            position: fixed;
+            width: 15px;
+            height: 15px;
+            background-color: #f2d74e;
+            position: absolute;
+            left: 50%;
+            animation: confetti 5s ease-in-out -2s infinite;
+            transform-origin: left top;
+        }
+
+        .confetti:nth-child(1) {
+            background-color: #f2d74e; left: 10%; animation-delay: 0;
+        }
+        .confetti:nth-child(2) {
+            background-color: #95c3de; left: 20%; animation-delay: -5s;
+        }
+        .confetti:nth-child(3) {
+            background-color: #ff9a91; left: 30%; animation-delay: -3s;
+        }
+        .confetti:nth-child(4) {
+            background-color: #f2d74e; left: 40%; animation-delay: -2.5s;
+        }
+        .confetti:nth-child(5) {
+            background-color: #95c3de; left: 50%; animation-delay: -4s;
+        }
+        .confetti:nth-child(6) {
+            background-color: #ff9a91; left: 60%; animation-delay: -6s;
+        }
+        .confetti:nth-child(7) {
+            background-color: #f2d74e; left: 70%; animation-delay: -1.5s;
+        }
+        .confetti:nth-child(8) {
+            background-color: #95c3de; left: 80%; animation-delay: -2s;
+        }
+        .confetti:nth-child(9) {
+            background-color: #ff9a91; left: 90%; animation-delay: -3.5s;
+        }
+        .confetti:nth-child(10) {
+            background-color: #f2d74e; left: 100%; animation-delay: -2.5s;
+        }
+
+        @keyframes confetti {
+            0% { transform: rotateZ(15deg) rotateY(0deg) translate(0, 0); }
+            25% { transform: rotateZ(5deg) rotateY(360deg) translate(-5vw, 20vh); }
+            50% { transform: rotateZ(15deg) rotateY(720deg) translate(5vw, 60vh); }
+            75% { transform: rotateZ(5deg) rotateY(1080deg) translate(-10vw, 80vh); }
+            100% { transform: rotateZ(15deg) rotateY(1440deg) translate(10vw, 110vh); }
+        }
+    </style>
+</head>
+<body>
+    <a href="/" class="back-button">← Zurück zum Menü</a>
+    
+    <div class="container">
+        <h1 class="game-title animate__animated animate__bounceIn">🔐 Passwort-Spiel 🔐</h1>
+        
+        <p class="game-description animate__animated animate__fadeIn">
+            Willkommen beim Passwort-Spiel! Versuche, das geheime Wort zu erraten. Du hast 6 Versuche.
+            Nach jedem Versuch erhältst du einen Hinweis, wie viele Buchstaben richtig sind.
+        </p>
+        
+        <div class="password-display" id="passwordDisplay"></div>
+        
+        <div class="hint-container">
+            <p class="hint-text" id="hintText">Drücke auf "Neues Spiel", um zu starten!</p>
+        </div>
+        
+        <div class="guess-container animate__animated animate__fadeInUp">
+            <input type="text" class="guess-input" id="guessInput" placeholder="Dein Versuch..." maxlength="15">
+            <div class="text-center">
+                <button class="btn btn-guess" id="guessButton">Raten</button>
+                <button class="btn btn-new-game" id="newGameButton">Neues Spiel</button>
+            </div>
+        </div>
+        
+        <div class="game-over-container" id="gameOverContainer">
+            <h2 class="game-over-title" id="gameOverTitle"></h2>
+            <p class="game-over-message" id="gameOverMessage"></p>
+        </div>
+        
+        <div class="score-container animate__animated animate__fadeIn">
+            <h3 class="score-title">Deine Punkte</h3>
+            <div class="score-value" id="scoreValue">0</div>
+        </div>
+        
+        <div class="attempts-container">
+            <h3 class="attempts-title">Deine Versuche</h3>
+            <div class="attempts-list" id="attemptsList"></div>
+        </div>
+    </div>
+    
+    <div id="confettiContainer"></div>
+    
+    <script>
+        let currentWord = '';
+        let attempts = 0;
+        let maxAttempts = 6;
+        let gameOver = false;
+        let score = 0;
+        
+        const guessInput = document.getElementById('guessInput');
+        const guessButton = document.getElementById('guessButton');
+        const newGameButton = document.getElementById('newGameButton');
+        const passwordDisplay = document.getElementById('passwordDisplay');
+        const hintText = document.getElementById('hintText');
+        const scoreValue = document.getElementById('scoreValue');
+        const attemptsList = document.getElementById('attemptsList');
+        const gameOverContainer = document.getElementById('gameOverContainer');
+        const gameOverTitle = document.getElementById('gameOverTitle');
+        const gameOverMessage = document.getElementById('gameOverMessage');
+        const confettiContainer = document.getElementById('confettiContainer');
+        
+        // Deaktiviere den Raten-Button am Anfang
+        guessButton.disabled = true;
+        
+        // Tastatureingabe überwachen
+        guessInput.addEventListener('keyup', function(event) {
+            if (event.key === 'Enter' && !guessButton.disabled) {
+                makeGuess();
+            }
+        });
+        
+        // Buttons mit Event-Listenern versehen
+        guessButton.addEventListener('click', makeGuess);
+        newGameButton.addEventListener('click', startNewGame);
+        
+        // Neues Wort vom Server holen
+        function fetchNewWord() {
+            fetch('/get_word')
+                .then(response => response.json())
+                .then(data => {
+                    currentWord = data.word;
+                    displayPasswordPlaceholder();
+                    guessButton.disabled = false;
+                    guessInput.disabled = false;
+                    guessInput.focus();
+                    console.log("Neues Wort: " + currentWord); // Für Testzwecke
+                })
+                .catch(error => {
+                    console.error('Fehler beim Laden des Wortes:', error);
+                    hintText.textContent = "Fehler beim Laden des Wortes. Bitte versuche es erneut.";
+                });
+        }
+        
+        // Platzhalter für das Passwort anzeigen
+        function displayPasswordPlaceholder() {
+            passwordDisplay.innerHTML = '';
+            for (let i = 0; i < currentWord.length; i++) {
+                const letter = document.createElement('span');
+                letter.className = 'letter';
+                letter.textContent = '_';
+                letter.style.animationDelay = `${i * 0.1}s`;
+                passwordDisplay.appendChild(letter);
+            }
+        }
+        
+        // Passwort aufdecken
+        function revealPassword() {
+            passwordDisplay.innerHTML = '';
+            for (let i = 0; i < currentWord.length; i++) {
+                const letter = document.createElement('span');
+                letter.className = 'letter';
+                letter.textContent = currentWord[i].toUpperCase();
+                letter.style.animationDelay = `${i * 0.1}s`;
+                passwordDisplay.appendChild(letter);
+            }
+        }
+        
+        // Rate-Logik
+        function makeGuess() {
+            if (gameOver) return;
+            
+            const guess = guessInput.value.trim().toLowerCase();
+            
+            if (guess.length === 0) {
+                hintText.textContent = "Bitte gib einen Versuch ein!";
+                return;
+            }
+            
+            attempts++;
+            
+            // Füge den Versuch zur Liste hinzu
+            const attemptItem = document.createElement('div');
+            attemptItem.textContent = guess;
+            
+            if (guess === currentWord) {
+                // Korrekter Versuch
+                attemptItem.className = 'attempt-item attempt-correct';
+                endGame(true);
+            } else {
+                // Falscher Versuch
+                attemptItem.className = 'attempt-item attempt-wrong';
+                
+                // Berechne Ähnlichkeit (wie viele Buchstaben sind richtig)
+                let correctLetters = 0;
+                const guessChars = guess.split('');
+                const wordChars = currentWord.split('');
+                
+                for (let i = 0; i < Math.min(guessChars.length, wordChars.length); i++) {
+                    if (guessChars[i] === wordChars[i]) {
+                        correctLetters++;
+                    }
+                }
+                
+                // Zeige Hinweis
+                if (guess.length !== currentWord.length) {
+                    hintText.textContent = `Das Wort hat ${currentWord.length} Buchstaben. Dein Versuch hat ${guess.length} Buchstaben.`;
+                } else {
+                    hintText.textContent = `${correctLetters} von ${currentWord.length} Buchstaben sind richtig.`;
+                }
+                
+                // Prüfe, ob maximale Versuche erreicht
+                if (attempts >= maxAttempts) {
+                    endGame(false);
+                }
+            }
+            
+            attemptsList.insertBefore(attemptItem, attemptsList.firstChild);
+            guessInput.value = '';
+            guessInput.focus();
+        }
+        
+        // Spiel beenden
+        function endGame(isWin) {
+            gameOver = true;
+            guessButton.disabled = true;
+            guessInput.disabled = true;
+            revealPassword();
+            
+            gameOverContainer.style.display = 'block';
+            
+            if (isWin) {
+                // Gewonnen
+                const pointsEarned = Math.max(1, maxAttempts - attempts + 1) * 10;
+                score += pointsEarned;
+                scoreValue.textContent = score;
+                
+                gameOverContainer.className = 'game-over-container game-over-win animate__animated animate__bounceIn';
+                gameOverTitle.textContent = '🎉 Gewonnen! 🎉';
+                gameOverMessage.textContent = `Super! Du hast das Wort "${currentWord.toUpperCase()}" in ${attempts} Versuchen erraten und ${pointsEarned} Punkte verdient.`;
+                
+                // Konfetti-Animation
+                createConfetti();
+            } else {
+                // Verloren
+                gameOverContainer.className = 'game-over-container game-over-lose animate__animated animate__fadeIn';
+                gameOverTitle.textContent = '😢 Verloren!';
+                gameOverMessage.textContent = `Schade! Das gesuchte Wort war "${currentWord.toUpperCase()}". Versuche es noch einmal!`;
+            }
+        }
+        
+        // Neues Spiel starten
+        function startNewGame() {
+            attempts = 0;
+            gameOver = false;
+            
+            // UI zurücksetzen
+            guessInput.value = '';
+            hintText.textContent = 'Rate das Wort...';
+            gameOverContainer.style.display = 'none';
+            
+            // Konfetti entfernen
+            confettiContainer.innerHTML = '';
+            
+            // Neues Wort holen
+            fetchNewWord();
+        }
+        
+        // Konfetti-Animation erstellen
+        function createConfetti() {
+            confettiContainer.innerHTML = '';
+            
+            for (let i = 0; i < 10; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.left = `${i * 10}%`;
+                confettiContainer.appendChild(confetti);
+            }
+        }
+        
+        // Initialisieren
+        window.addEventListener('DOMContentLoaded', function() {
+            guessInput.disabled = true;
+        });
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html> 
