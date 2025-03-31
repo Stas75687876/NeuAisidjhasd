@@ -153,7 +153,11 @@ password_categories = {
     "regen": "Natur", "schnee": "Natur", "wind": "Natur", "blatt": "Natur"
 }
 
-# Lokale Antwortdatenbank für den KI-Assistenten (ohne DeepSeek API)
+# DeepSeek API-Einstellungen
+DEEPSEEK_API_URL = "https://api.deepseek.com/v1/chat/completions"
+DEEPSEEK_API_KEY = "sk-71bc2039491847d79d1d64902746c5cc"  # Der API-Schlüssel, den der Benutzer angegeben hat
+
+# Fallback-Antworten für den Fall, dass die API nicht verfügbar ist
 ai_responses = {
     "default": "Ich bin nicht sicher, wie ich darauf antworten soll. Kannst du deine Frage umformulieren?",
     "grüße": [
@@ -168,32 +172,6 @@ ai_responses = {
     "wer bist du": [
         "Ich bin ein KI-Assistent, der für dieses Schulprojekt erstellt wurde. Ich helfe dir gerne mit Fragen zu allen möglichen Themen!",
         "Ich bin ein virtueller Assistent, der für Schulkinder entwickelt wurde. Ich kann bei Hausaufgaben helfen oder Fragen beantworten."
-    ],
-    "planeten": [
-        "In unserem Sonnensystem gibt es 8 Planeten: Merkur, Venus, Erde, Mars, Jupiter, Saturn, Uranus und Neptun. Früher zählte man auch Pluto dazu, aber er gilt jetzt als Zwergplanet."
-    ],
-    "photosynthese": [
-        "Photosynthese ist der Prozess, bei dem Pflanzen mit Hilfe von Sonnenlicht, Wasser und Kohlendioxid Nahrung (Zucker) und Sauerstoff herstellen. Es ist wie Zauberei, die Pflanzen können aus Sonnenlicht Energie gewinnen!"
-    ],
-    "tiere": [
-        "Es gibt viele verschiedene Tierarten auf der Welt! Insgesamt gibt es mehr als 1,5 Millionen bekannte Tierarten, und Wissenschaftler entdecken immer noch neue."
-    ],
-    "computer": [
-        "Ein Computer ist eine Maschine, die Anweisungen (Programme) ausführen kann. Er hat einen Prozessor als Gehirn, Speicher zum Merken von Daten und verschiedene Geräte, um Daten ein- und auszugeben, wie Monitor, Tastatur und Maus."
-    ],
-    "lerntipps": [
-        "Hier sind einige Lerntipps für dich: 1. Lerne in kurzen Einheiten mit Pausen. 2. Wiederhole regelmäßig, was du gelernt hast. 3. Erkläre den Stoff jemandem anderen oder sprich laut mit dir selbst. 4. Nutze bunte Markierungen oder Zeichnungen. 5. Schlafe ausreichend, damit dein Gehirn arbeiten kann."
-    ],
-    "geschichte": [
-        "Es war einmal ein kleiner, neugieriger Roboter namens Blip. Blip lebte in einer bunten Stadt voller anderer Roboter. Eines Tages fand er einen seltsamen, glänzenden Stein. Als er ihn berührte, begann der Stein zu leuchten und plötzlich konnte Blip die Gedanken aller Pflanzen in seiner Umgebung hören! Die Bäume erzählten von der Sonne, die Blumen vom Regen und das Gras davon, wie es sich anfühlt, wenn Kinder darüber laufen. Blip lernte viel von den Pflanzen und wurde zum Beschützer des Stadtparks. Und wenn er nicht ausgeschaltet ist, hört er auch heute noch den Pflanzen zu."
-    ],
-    "mathe": [
-        "Bei Mathe-Hausaufgaben kann ich dir gerne helfen! Was genau möchtest du wissen? Addition, Subtraktion, Multiplikation oder Division? Oder vielleicht etwas anderes?"
-    ],
-    "danke": [
-        "Gerne! Ich helfe dir jederzeit wieder!",
-        "Kein Problem! Ich freue mich, wenn ich helfen konnte.",
-        "Gern geschehen! Hast du noch weitere Fragen?"
     ]
 }
 
@@ -290,48 +268,69 @@ def ki_assistent():
 @app.route('/ask_ai', methods=['POST'])
 def ask_ai():
     data = request.json
-    query = data.get('query', '').lower()
+    query = data.get('query', '')
     
-    # Lokale Verarbeitung anstatt DeepSeek API zu verwenden
     try:
-        # Verzögerung, um das "Nachdenken" zu simulieren
-        import time
-        time.sleep(1)
+        # Anfrage an die DeepSeek API vorbereiten
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {DEEPSEEK_API_KEY}"
+        }
         
-        # Einfache Antwortsuche in der lokalen Datenbank
-        response = None
+        payload = {
+            "model": "deepseek-chat",
+            "messages": [
+                {
+                    "role": "system", 
+                    "content": "Du bist ein freundlicher und hilfsbereiter KI-Assistent für Grundschüler. Erkläre Dinge auf einfache, altersgerechte Weise. Halte deine Antworten kurz, informativ und positiv. Verwende keine komplexen Fachbegriffe ohne Erklärung. Antworte auf Deutsch."
+                },
+                {
+                    "role": "user", 
+                    "content": query
+                }
+            ],
+            "temperature": 0.7,
+            "max_tokens": 500
+        }
         
-        # Prüfe auf Schlüsselwörter
-        for key, answers in ai_responses.items():
-            if key == "default":
-                continue
-                
-            if key in query:
-                response = random.choice(answers)
-                break
+        # Anfrage an die DeepSeek API senden
+        response = requests.post(DEEPSEEK_API_URL, headers=headers, json=payload)
+        response_data = response.json()
         
-        # Standardantwort, wenn nichts passt
-        if not response:
-            # Einige spezielle Fälle für allgemeine Fragen
-            if "was" in query and ("ist" in query or "sind" in query):
-                response = f"Das ist eine interessante Frage über {query.split('ist')[-1].strip() if 'ist' in query else query.split('sind')[-1].strip()}. In der Schule lernst du mehr darüber, aber kurz gesagt: Es ist ein wichtiges Konzept, das mit unserem Alltag und der Welt um uns herum zu tun hat."
-            elif "wie" in query and "funktioniert" in query:
-                response = f"Die Funktionsweise von {query.split('funktioniert')[-1].strip()} ist faszinierend! Es gibt verschiedene Teile, die zusammenarbeiten, ähnlich wie in einem Team. Jeder Teil hat eine bestimmte Aufgabe, und wenn alle zusammenarbeiten, funktioniert alles gut."
-            elif "warum" in query:
-                response = f"Das ist eine gute Frage! Der Grund dafür hat mit Naturgesetzen und wie die Welt funktioniert zu tun. Wissenschaftler erforschen solche Fragen ständig, um sie besser zu verstehen."
-            elif "erzähl" in query or "geschichte" in query:
-                response = random.choice(ai_responses["geschichte"])
+        # Antwort aus der API extrahieren
+        if 'choices' in response_data and len(response_data['choices']) > 0:
+            ai_response = response_data['choices'][0]['message']['content']
+        else:
+            # Fallback auf eine lokale Antwort, wenn die API keinen gültigen Response liefert
+            for key in ai_responses:
+                if key != "default" and key in query.lower():
+                    if isinstance(ai_responses[key], list):
+                        ai_response = random.choice(ai_responses[key])
+                    else:
+                        ai_response = ai_responses[key]
+                    break
             else:
-                response = random.choice(ai_responses["default"])
-        
+                ai_response = random.choice(ai_responses["default"]) if isinstance(ai_responses["default"], list) else ai_responses["default"]
+            
         return jsonify({
-            "response": response
+            "response": ai_response
         })
     
     except Exception as e:
-        print(f"Fehler bei der lokalen Verarbeitung: {str(e)}")
+        print(f"Fehler bei der DeepSeek API-Anfrage: {str(e)}")
+        # Bei Fehlern Fallback auf eine lokale Antwort
+        for key in ai_responses:
+            if key != "default" and key in query.lower():
+                if isinstance(ai_responses[key], list):
+                    ai_response = random.choice(ai_responses[key])
+                else:
+                    ai_response = ai_responses[key]
+                break
+        else:
+            ai_response = random.choice(ai_responses["default"]) if isinstance(ai_responses["default"], list) else ai_responses["default"]
+            
         return jsonify({
-            "response": "Entschuldigung, bei der Verarbeitung deiner Anfrage ist ein Fehler aufgetreten. Bitte versuche es später noch einmal."
+            "response": ai_response
         })
 
 if __name__ == '__main__':
